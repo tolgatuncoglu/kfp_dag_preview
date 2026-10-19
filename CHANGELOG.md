@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 ### Added
 - Horizontal/vertical DAG layout selector for Python and compiled YAML previews. The selection persists through refreshes and group changes and is reflected in Copy Mermaid.
@@ -8,6 +8,10 @@
 
 ### Changed
 - Fit now fits both dimensions and resets the scroll position. Toolbar controls wrap in narrow panels.
+- Version tags create GitHub releases with a VSIX asset. Publishing to VS Code Marketplace and Open VSX requires an explicit manual workflow opt-in.
+
+### Fixed
+- Zoom out no longer enlarges diagrams fitted below the usual minimum zoom.
 
 ## 0.2.0
 

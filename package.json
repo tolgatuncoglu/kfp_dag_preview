@@ -3,7 +3,7 @@
   "displayName": "KFP DAG Preview",
   "icon": "images/icon.png",
   "description": "Read-only local DAG preview for Kubeflow Pipelines",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "author": "Tolga Tuncoglu",
   "publisher": "TolgaTuncoglu",
