@@ -58,6 +58,8 @@ Run `npx playwright install chromium` once, then `npm run test:browser` for brow
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
+Pushing a `v<version>` tag runs the release workflow, checks that the tag matches `package.json`, builds the VSIX, and attaches it to a GitHub release. Tag pushes do not publish to extension stores. Store publication is a separate, explicit choice: manually run the **Release** workflow on the version tag with `publish_marketplaces` set to `true`. The default is `false`.
+
 ## License
 
 [MIT](LICENSE) © 2026 Tolga Tuncoglu.

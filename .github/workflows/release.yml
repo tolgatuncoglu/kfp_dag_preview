@@ -3,6 +3,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      publish_marketplaces:
+        description: "Also publish to VS Code Marketplace and Open VSX (run on a version tag)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -33,6 +39,7 @@ jobs:
       - run: npm run package
 
       - name: Sign in to Microsoft Entra
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_marketplaces }}
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -40,9 +47,11 @@ jobs:
           allow-no-subscriptions: true
 
       - name: Publish to VS Code Marketplace
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_marketplaces }}
         run: npx vsce publish --packagePath kfp-dag-preview.vsix --azure-credential
 
       - name: Publish to Open VSX
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_marketplaces }}
         run: npx ovsx publish kfp-dag-preview.vsix -p "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
