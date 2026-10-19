@@ -1,5 +1,5 @@
 import type { PipelineGraph } from '../core/graph';
-import { toMermaid } from '../core/mermaid';
+import { toMermaid, type DagDirection } from '../core/mermaid';
 
 export type PreviewPanel = {
   showLoading(): void;
@@ -26,6 +26,7 @@ export class PreviewController {
   private lastGraph?: PipelineGraph;
   private lastError?: string;
   private mermaidSource = '';
+  private direction: DagDirection = 'LR';
   private readonly collapsed = new Set<string>();
   private allowLargeGraph = false;
 
@@ -79,7 +80,7 @@ export class PreviewController {
   private showGraphOrWarning(): void {
     const graph = this.lastGraph;
     if (!graph) return;
-    this.mermaidSource = toMermaid(graph, this.collapsed);
+    this.mermaidSource = toMermaid(graph, this.collapsed, this.direction);
     if (!this.allowLargeGraph && (graph.nodeCount > 500 || graph.edgeCount > 1_000 || this.mermaidSource.length > 50_000)) {
       this.options.panel.showSizeWarning(graph.nodeCount, graph.edgeCount);
       return;
@@ -90,6 +91,12 @@ export class PreviewController {
   collapse(scopeId: string): void {
     if (this.collapsed.has(scopeId)) this.collapsed.delete(scopeId);
     else this.collapsed.add(scopeId);
+    this.showGraphOrWarning();
+  }
+
+  setDirection(direction: DagDirection): void {
+    if (this.disposed || this.direction === direction) return;
+    this.direction = direction;
     this.showGraphOrWarning();
   }
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Horizontal/vertical DAG layout selector for Python and compiled YAML previews. The selection persists through refreshes and group changes and is reflected in Copy Mermaid.
+- Click-and-drag panning on the DAG canvas, with a movement threshold to preserve task clicks.
+
+### Changed
+- Fit now fits both dimensions and resets the scroll position. Toolbar controls wrap in narrow panels.
+
 ## 0.2.0
 
 ### Added

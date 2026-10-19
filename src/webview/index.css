@@ -1,16 +1,18 @@
-body { margin: 0; color: var(--vscode-editor-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family, sans-serif); font-size: var(--vscode-font-size, 13px); }
+body { margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--vscode-editor-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family, sans-serif); font-size: var(--vscode-font-size, 13px); }
 button, select { color: var(--vscode-button-secondaryForeground, var(--vscode-button-foreground)); background: var(--vscode-button-secondaryBackground, var(--vscode-button-background)); border: 1px solid var(--vscode-button-secondaryBorder, var(--vscode-panel-border, transparent)); border-radius: 3px; padding: 5px 8px; cursor: pointer; }
 button:hover { background: var(--vscode-button-secondaryHoverBackground, var(--vscode-button-hoverBackground)); }
 button:focus-visible, select:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: 2px; }
-.toolbar { display: flex; gap: 6px; align-items: center; padding: 8px; border-bottom: 1px solid var(--vscode-panel-border); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px; border-bottom: 1px solid var(--vscode-panel-border); }
 #status, #warning { padding: 6px 10px; overflow-wrap: anywhere; }
 #status { max-height: 3.2em; overflow: hidden; }
 #warning { background: var(--vscode-inputValidation-warningBackground); }
-main { display: flex; height: calc(100vh - 92px); min-height: 300px; }
-#canvas { flex: 1; overflow: auto; padding: 12px; }
+main { display: flex; flex: 1; min-height: 0; }
+#canvas { flex: 1; min-width: 0; min-height: 0; overflow: auto; padding: 12px; cursor: grab; user-select: none; touch-action: none; }
+#canvas:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
+#canvas.panning, #canvas.panning * { cursor: grabbing !important; }
 #diagram { transform-origin: top left; width: max-content; min-width: 100%; }
 #diagram svg { max-width: none; background: transparent; }
-#details { width: 230px; overflow: auto; padding: 12px; border-left: 1px solid var(--vscode-panel-border); background: var(--vscode-editorWidget-background, var(--vscode-editor-background)); }
+#details { width: 230px; flex-shrink: 0; overflow: auto; padding: 12px; border-left: 1px solid var(--vscode-panel-border); background: var(--vscode-editorWidget-background, var(--vscode-editor-background)); }
 #details h2 { margin-top: 0; font-size: 1.1em; }
 #task-list { width: 100%; background: var(--vscode-dropdown-background); color: var(--vscode-dropdown-foreground); border-color: var(--vscode-dropdown-border, var(--vscode-panel-border)); }
 #task-detail p { overflow-wrap: anywhere; }

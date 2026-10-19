@@ -8,6 +8,9 @@ node_modules/**
 esbuild.mjs
 tsconfig.json
 vitest.config.mts
+playwright.config.ts
+test-results/**
+playwright-report/**
 package-lock.json
 *.vsix
 .github/**

@@ -13,6 +13,7 @@ const state = vi.hoisted(() => ({
   created: 0,
   reveals: 0,
   watchers: [] as any[],
+  copied: '',
   saveListener: undefined as undefined | ((d: any) => void),
 }));
 
@@ -20,9 +21,10 @@ vi.mock('../../src/host/panel', () => ({
   createDagPanel: (_uri: unknown, callbacks: any) => {
     state.created++;
     state.panel = {
+      callbacks,
       reveal() { state.reveals++; },
       whenReady: async () => {},
-      showLoading() {}, showGraph() {}, showError() {}, showSizeWarning() {},
+      showLoading() {}, showGraph: vi.fn(), showError() {}, showSizeWarning() {},
       dispose: vi.fn(() => { state.panelDisposals++; callbacks.disposed(); }),
     };
     state.panels.push(state.panel);
@@ -67,7 +69,7 @@ vi.mock('vscode', () => ({
   },
   Uri: { joinPath: (base: any, ...parts: string[]) => ({ path: '/work' + parts.join('/').replace(/^\.\./, ''), toString: () => 'file:///work' }) },
   RelativePattern: class { constructor(public base: any, public pattern: string) {} },
-  env: { clipboard: { writeText: async () => {} } },
+  env: { clipboard: { writeText: async (text: string) => { state.copied = text; } } },
 }));
 
 import { compilePipeline } from '../../src/host/compiler';
@@ -92,6 +94,17 @@ const yamlUri = { scheme: 'file', fsPath: '/work/pipeline.yaml', path: '/work/pi
 const pyUri = { scheme: 'file', fsPath: '/work/pipeline.py', path: '/work/pipeline.py', toString: () => 'file:///work/pipeline.py' };
 
 describe('extension activation', () => {
+  it.each(['previewPython', 'previewYaml'])('wires layout and Copy Mermaid for %s without another compile', async (command) => {
+    activate({ subscriptions: [] } as any);
+    await state.handlers.get(`kfpDagPreview.${command}`)!(command === 'previewPython' ? pyUri : yamlUri, 'demo');
+    const compiles = vi.mocked(compilePipeline).mock.calls.length;
+    state.panel.callbacks.setDirection('TB');
+    expect(state.panel.showGraph).toHaveBeenLastCalledWith(expect.anything(), expect.stringMatching(/^flowchart TB\n/), undefined);
+    state.panel.callbacks.copyMermaid();
+    expect(state.copied).toMatch(/^flowchart TB\n/);
+    expect(vi.mocked(compilePipeline)).toHaveBeenCalledTimes(compiles);
+  });
+
   it('registers Python and compiled YAML preview commands', () => {
     activate({ subscriptions: [] } as any);
     expect([...state.handlers.keys()]).toEqual([

@@ -2,6 +2,7 @@ import mermaid from 'mermaid';
 import type { GraphTask, PipelineGraph } from '../core/graph';
 import { mermaidNodeId } from '../core/mermaid';
 import { initializeMermaid } from './mermaidSetup';
+import { enablePanning } from './pan';
 import { PreviewStatus, summarizeError } from './previewStatus';
 import { indexNodesByMermaidId, reconcileTaskDetails, tasksIn } from './taskSelection';
 import { readMermaidTheme, watchVsCodeTheme } from './theme';
@@ -19,7 +20,9 @@ let currentGraph: PipelineGraph | undefined;
 let currentSource = '';
 let renderGeneration = 0;
 let scale = 1;
+let renderedDirection = 'flowchart LR';
 const previewStatus = new PreviewStatus();
+enablePanning(canvas);
 
 let themeSignature = '';
 function applyTheme(): void {
@@ -75,10 +78,15 @@ function renderTaskList(graph: PipelineGraph): void {
 
 async function render(): Promise<void> {
   const generation = ++renderGeneration;
+  const direction = currentSource.split('\n', 1)[0];
   try {
     const { svg } = await mermaid.render(`kfp-dag-${generation}`, currentSource);
     if (generation !== renderGeneration) return;
     diagram.innerHTML = svg;
+    if (direction !== renderedDirection) {
+      canvas.scrollTo(0, 0);
+      renderedDirection = direction;
+    }
     const nodes = indexNodesByMermaidId(diagram.querySelectorAll<SVGGElement>('g.node'));
     for (const task of currentGraph ? tasksIn(currentGraph.root) : []) {
       const element = nodes.get(mermaidNodeId(task.id));
@@ -102,6 +110,9 @@ taskList.addEventListener('change', () => {
   if (task) detail(task);
 });
 byId<HTMLButtonElement>('refresh').addEventListener('click', () => vscode.postMessage({ type: 'refresh' }));
+byId<HTMLSelectElement>('layout').addEventListener('change', (event) => {
+  vscode.postMessage({ type: 'setDirection', direction: (event.target as HTMLSelectElement).value });
+});
 byId<HTMLButtonElement>('copy').addEventListener('click', () => vscode.postMessage({ type: 'copyMermaid' }));
 byId<HTMLButtonElement>('show-output').addEventListener('click', () => vscode.postMessage({ type: 'showOutput' }));
 byId<HTMLButtonElement>('render-anyway').addEventListener('click', () => {
@@ -113,15 +124,19 @@ byId<HTMLButtonElement>('zoom-in').addEventListener('click', () => {
   diagram.style.transform = `scale(${scale})`;
 });
 byId<HTMLButtonElement>('zoom-out').addEventListener('click', () => {
-  scale = Math.max(0.2, scale / 1.2);
+  // Fit can be below the usual zoom floor; never enlarge the graph on zoom out.
+  scale = Math.min(scale, Math.max(0.2, scale / 1.2));
   diagram.style.transform = `scale(${scale})`;
 });
 byId<HTMLButtonElement>('fit').addEventListener('click', () => {
   const svg = diagram.querySelector('svg');
   if (!svg) return;
   const width = svg.getBoundingClientRect().width / scale;
-  scale = Math.min(1, (canvas.clientWidth - 24) / width);
+  const height = svg.getBoundingClientRect().height / scale;
+  if (width <= 0 || height <= 0) return;
+  scale = Math.min(1, Math.max(1, canvas.clientWidth - 24) / width, Math.max(1, canvas.clientHeight - 24) / height);
   diagram.style.transform = `scale(${scale})`;
+  canvas.scrollTo(0, 0);
 });
 
 window.addEventListener('message', (event: MessageEvent) => {

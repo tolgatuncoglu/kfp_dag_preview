@@ -49,6 +49,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (source) void vscode.env.clipboard.writeText(source);
       },
       collapse: (scopeId) => controller?.collapse(scopeId),
+      setDirection: (direction) => controller?.setDirection(direction),
       renderAnyway: () => controller?.renderAnyway(),
       showOutput: () => output.show(true),
       disposed: () => {

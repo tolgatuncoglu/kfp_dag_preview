@@ -8,6 +8,15 @@ const graph = (name: string) =>
   parsePipelineSpec(readFileSync(join(__dirname, '..', 'fixtures', name), 'utf8'));
 
 describe('toMermaid', () => {
+  it('supports top-to-bottom layout without changing tasks, links, or collapsed groups', () => {
+    const nested = graph('nested.yaml');
+    for (const collapsed of [new Set<string>(), new Set(['root/group'])]) {
+      const horizontal = toMermaid(nested, collapsed);
+      const vertical = toMermaid(nested, collapsed, 'TB');
+      expect(vertical).toBe(horizontal.replace('flowchart LR\n', 'flowchart TB\n'));
+    }
+  });
+
   it('renders tasks and uses different arrows for data and ordering', () => {
     const source = toMermaid(graph('data.yaml'));
     expect(source.startsWith('flowchart LR\n')).toBe(true);
