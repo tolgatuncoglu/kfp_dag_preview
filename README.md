@@ -26,6 +26,10 @@ The extension picks the `kfp` command in this order: the `kfpDagPreview.kfpExecu
 
 The panel includes zoom and fit controls, a task detail list, nested group collapse controls, and **Copy Mermaid**. Copy Mermaid puts the standalone Mermaid flowchart source on the clipboard. The panel renders Mermaid itself; it does not depend on any Mermaid extension.
 
+Choose **Horizontal** (the default, left to right) or **Vertical** (top to bottom) in the toolbar. The layout applies to Python and compiled YAML previews and stays selected while the panel is open, including refreshes and group changes. **Copy Mermaid** uses the selected layout. Changing layout does not recompile Python.
+
+Click and drag anywhere on the DAG to pan, including from a task. A click with no drag still opens task details. Scrollbars, trackpad scrolling, and the **−** / **+** zoom controls remain available. **Fit** fits the graph's width and height and returns to its beginning.
+
 The diagram and controls use the active VS Code theme colors, including dark and high contrast themes. An open preview updates when the theme changes.
 
 For a compiled KFP v2 PipelineSpec YAML file, run **KFP: Preview Compiled DAG**. This command reads the YAML directly, runs no Python, and works in Restricted Mode; it refreshes when that YAML file changes.
@@ -45,6 +49,8 @@ Run `npm ci`, then `npm test`, `npm run typecheck`, `npm run build`, and `npm ru
 `test/fixtures/pipeline.py` and `test/fixtures/stress_pipeline.py` are real KFP v2 examples (nested pipelines, data and ordering links, `If`/`Else`, `ParallelFor`, `ExitHandler`, `Collected`). Their tests skip when `kfp` is unavailable. Set `KFP_CLI` to an installed CLI path to require the real compiler tests; compiler failures then fail the test rather than skip it.
 
 Continuous integration runs typecheck, tests, build, and packaging on Linux and macOS.
+
+Run `npx playwright install chromium` once, then `npm run test:browser` for browser regression tests (also run in Linux CI). These load the production panel HTML, controller, and Mermaid bundle with a local VS Code message bridge, and check layout, task clicks, dragging, cancellation, group collapse, and narrow panels. They use local fixtures and do not contact a cluster or paid API. Set `KFP_SCREENSHOT_DIR` to save screenshots from the browser checks.
 
 ## Packaging
 

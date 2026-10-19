@@ -20,6 +20,10 @@ jobs:
       - run: npm test
       - run: npm run build
       - if: matrix.os == 'ubuntu-latest'
+        run: npx playwright install --with-deps chromium
+      - if: matrix.os == 'ubuntu-latest'
+        run: npm run test:browser
+      - if: matrix.os == 'ubuntu-latest'
         run: npm run package
       - if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4

@@ -22,6 +22,7 @@ function harness() {
     refresh: vi.fn(),
     copyMermaid: vi.fn(),
     collapse: vi.fn(),
+    setDirection: vi.fn(),
     renderAnyway: vi.fn(),
     showOutput: vi.fn(),
     disposed: vi.fn(),
@@ -30,6 +31,15 @@ function harness() {
 }
 
 describe('DagPanel', () => {
+  it('accepts only supported layout directions from the webview', () => {
+    const h = harness();
+    new DagPanel(h.panel, h.callbacks);
+    for (const direction of ['TB', 'LR', 'RL', 'TD', null, 42, undefined]) {
+      h.emit({ type: 'setDirection', direction });
+    }
+    expect(h.callbacks.setDirection.mock.calls).toEqual([['TB'], ['LR']]);
+  });
+
   it('reveals the underlying panel', () => {
     const h = harness();
     new DagPanel(h.panel, h.callbacks).reveal();

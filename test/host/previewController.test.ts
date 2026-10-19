@@ -61,6 +61,35 @@ function graphWithSourceLength(length: number): PipelineGraph {
 afterEach(() => vi.useRealTimers());
 
 describe('PreviewController', () => {
+  it('keeps layout through refresh and collapse, and copies the displayed direction without recompiling', async () => {
+    const load = vi.fn(async () => sample);
+    const h = harness(load);
+    await h.controller.start();
+    expect(h.controller.getMermaidSource()).toMatch(/^flowchart LR\n/);
+    h.controller.setDirection('TB');
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(h.panel.showGraph).toHaveBeenLastCalledWith(sample, expect.stringMatching(/^flowchart TB\n/), undefined);
+    h.controller.collapse('root/group');
+    await h.controller.refresh();
+    expect(h.controller.getMermaidSource()).toMatch(/^flowchart TB\n/);
+    h.controller.setDirection('LR');
+    expect(h.controller.getMermaidSource()).toMatch(/^flowchart LR\n/);
+  });
+
+  it('preserves stale errors and size gates when layout changes', async () => {
+    const h = harness(vi.fn().mockResolvedValueOnce(sample).mockRejectedValueOnce(new Error('broken import')));
+    await h.controller.start();
+    await h.controller.refresh();
+    h.controller.setDirection('TB');
+    expect(h.panel.showGraph).toHaveBeenLastCalledWith(sample, expect.stringMatching(/^flowchart TB\n/), 'broken import');
+    const large = harness(async () => ({ ...sample, nodeCount: 501 }));
+    await large.controller.start();
+    large.controller.setDirection('TB');
+    expect(large.panel.showGraph).not.toHaveBeenCalled();
+    large.controller.renderAnyway();
+    expect(large.panel.showGraph).toHaveBeenLastCalledWith(expect.anything(), expect.stringMatching(/^flowchart TB\n/), undefined);
+  });
+
   it('compiles immediately on explicit start and updates after saving its source', async () => {
     vi.useFakeTimers();
     const load = vi.fn(async () => sample);

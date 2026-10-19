@@ -1,5 +1,7 @@
 import type { GraphScope, GraphTask, PipelineGraph } from './graph';
 
+export type DagDirection = 'LR' | 'TB';
+
 const hexId = (value: string): string =>
   Array.from(new TextEncoder().encode(value), (byte) => byte.toString(16).padStart(2, '0')).join('');
 
@@ -55,8 +57,9 @@ function emitScope(scope: GraphScope, lines: string[], indent: string, collapsed
 export function toMermaid(
   graph: PipelineGraph,
   collapsedScopeIds: ReadonlySet<string> = new Set(),
+  direction: DagDirection = 'LR',
 ): string {
-  const lines = ['flowchart LR'];
+  const lines = [`flowchart ${direction}`];
   emitScope(graph.root, lines, '  ', collapsedScopeIds);
   return `${lines.join('\n')}\n`;
 }

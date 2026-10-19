@@ -9,5 +9,5 @@
     "types": ["node", "vscode", "vitest/globals"],
     "outDir": "dist"
   },
-  "include": ["src", "test", "vitest.config.mts"]
+  "include": ["src", "test", "vitest.config.mts", "playwright.config.ts"]
 }
